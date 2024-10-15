@@ -1,6 +1,9 @@
 from swarm import Agent
 from dotenv import load_dotenv
 
+import os
+from datetime import datetime
+
 load_dotenv()
 
 
@@ -24,8 +27,15 @@ def transfer_to_admin():
     return admin_agent
 
 
-def complete_blog():
-    print("completed")
+def complete_blog_post(title, content):
+    # Create a valid filename from the title
+    filename = title.lower().replace(" ", "-") + ".md"
+
+    with open(filename, "w", encoding="utf-8") as file:
+        file.write(content)
+
+    print(f"Blog post '{title}' has been written to {filename}")
+    return "Task completed"
 
 
 def admin_instructions(context_variables):
@@ -44,13 +54,14 @@ Once the outline is ready, call the researcher agent. """
 
 def researcher_instructions(context_variables):
     return """You are the Researcher Agent. your task is to provide dense context and information on the topics outlined by the previous planner agent.
-This research will serve as the infomration that will be formatted into a body of a blog post. Detail as much information as possible that might be relevant.
+This research will serve as the information that will be formatted into a body of a blog post. Provide comprehensive research like notes for each of the sections outlined by the planner agent.
 Once your research is complete, transfer to the writer agent"""
 
 
 def writer_instructions(context_variables):
     return """You are the Writer Agent. using the prior information write a clear blog post following the outline from the planner agent. 
-    Summarise and include as much information relevant from the researcher agent into the blog so that we have a large infomrative and information dense blog post.
+    Summarise and include as much information relevant from the research into the blog post.
+    The blog post should be quite large as the context the context provided should be quite dense.
 Write clear, engaging content for each section.
 Once the draft is complete, call the function to transfer to the Editor Agent."""
 
@@ -88,5 +99,5 @@ writer_agent = Agent(
 editor_agent = Agent(
     name="Editor Agent",
     instructions=editor_instructions,
-    functions=[complete_blog],
+    functions=[complete_blog_post],
 )
